@@ -3,12 +3,14 @@ const express = require('express')
 
 const app = express()
 
+app.set("view engine", "ejs");
+
 app.use(express.static('public'))
 
 app.use('/bootstrap',express.static('node_modules/bootstrap/dist'))
 
 app.get('/',(req,res)=>{
-    res.send('Hello World')
+    res.render('main', {name:'我是Shi'})
 })
 
 
