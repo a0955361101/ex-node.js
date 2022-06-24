@@ -1,7 +1,13 @@
 require("dotenv").config();
 const express = require('express')
+const multer = require('multer');
+const upload = multer({dest: 'uploads'})
 
 const app = express()
+
+app.post('/try-upload',upload.single('avatar'),(req,res)=>{
+    res.json(req.file)
+})
 
 app.use(express.urlencoded({extended:false}))
 app.use(express.json())
@@ -17,6 +23,15 @@ app.get('/req.query',(req,res)=>{
 app.post('/try-post',(req,res)=>{
     res.json(req.body)
 })
+
+app.route('/try-post-form')
+    .get((req,res)=>{
+        res.render('try-post-form')
+    })
+    .post((req,res)=>{
+        const {email,password} = req.body;
+        res.render('try-post-form',{email,password})
+    })
 
 app.set("view engine", "ejs");
 
