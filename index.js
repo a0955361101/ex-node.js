@@ -2,7 +2,7 @@ require("dotenv").config();
 const express = require('express')
 const multer = require('multer');
 const upload = require('./module/upload-imgs');
-
+const session = require('express-session')
 const app = express()
 
 
@@ -14,8 +14,31 @@ app.post('/try-uploads',upload.array('photos'),(req,res)=>{
     res.json(req.files)
 })
 
+app.use(session({
+    saveUninitialized:false,
+    resave:false,
+    secret:'fasfjoijfeew12few1f1ew3f13ew1few',
+   
+}))
 app.use(express.urlencoded({extended:false}))
 app.use(express.json())
+app.use((req, res, next)=>{
+    res.locals.shinder = '哈囉';
+    next();
+});
+
+app.get('/try-session',(req,res)=>{
+    req.session.my_var = req.session.my_var || 0
+    req.session.my_var++;
+    res.json({
+        my_var:req.session.my_var,
+        session:req.session
+    })
+})
+
+
+// 區分大小寫
+app.set('case sensitive routing', true);
 
 app.get('/',(req,res)=>{
     res.render('main', {name:'我是Shi'})
@@ -33,6 +56,19 @@ app.get('/my-params1/:action?/:id?',(req,res)=>{
 
 app.get('/my-params2/*/*?',(req,res)=>{
     res.json(req.params)
+})
+
+const adminRouter = require(__dirname + '/routes/admin')
+app.use('/admin',adminRouter)
+app.use(adminRouter)
+
+
+app.get(/^\/hi\/?/i,(req,res)=>{
+    res.send({url: req.url, code:'array'})
+})
+
+app.get(['/aaa','/bbb'],(req,res)=>{
+    res.send({url: req.url, code:'array'});
 })
 
 app.get('/req.query',(req,res)=>{
