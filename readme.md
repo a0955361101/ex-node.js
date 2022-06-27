@@ -22,7 +22,8 @@ res.render()
 
 ------
 
-# <div style="color:red;">RESTful API</div> 
+
+# <font color="#f00">RESTful API</font>
 
 ## CRUD
 
