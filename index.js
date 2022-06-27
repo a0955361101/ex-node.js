@@ -1,12 +1,17 @@
 require("dotenv").config();
 const express = require('express')
 const multer = require('multer');
-const upload = multer({dest: 'uploads'})
+const upload = require('./module/upload-imgs');
 
 const app = express()
 
+
 app.post('/try-upload',upload.single('avatar'),(req,res)=>{
     res.json(req.file)
+})
+
+app.post('/try-uploads',upload.array('photos'),(req,res)=>{
+    res.json(req.files)
 })
 
 app.use(express.urlencoded({extended:false}))
@@ -14,6 +19,20 @@ app.use(express.json())
 
 app.get('/',(req,res)=>{
     res.render('main', {name:'我是Shi'})
+})
+
+app.get('/my-params1/:action/:id',(req,res)=>{
+    res.json(req.params)
+})
+app.get('/my-params1/:action',(req,res)=>{
+    res.json(req.params)
+})
+app.get('/my-params1/:action?/:id?',(req,res)=>{
+    res.json(req.params)
+})
+
+app.get('/my-params2/*/*?',(req,res)=>{
+    res.json(req.params)
 })
 
 app.get('/req.query',(req,res)=>{
