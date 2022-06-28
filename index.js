@@ -3,6 +3,10 @@ const express = require('express')
 const multer = require('multer');
 const upload = require('./module/upload-imgs');
 const session = require('express-session')
+const moment = require('moment-timezone')
+const db = require(__dirname + '/module/mysql-connect');
+const MysqlStore = require('express-mysql-session')(session);
+const sessionStore = new MysqlStore({}, db);
 const app = express()
 
 
@@ -18,6 +22,10 @@ app.use(session({
     saveUninitialized:false,
     resave:false,
     secret:'fasfjoijfeew12few1f1ew3f13ew1few',
+    store: sessionStore,
+    cookie:{
+        maxAge:1800000, // 30 min
+    }
    
 }))
 app.use(express.urlencoded({extended:false}))
@@ -33,6 +41,19 @@ app.get('/try-session',(req,res)=>{
     res.json({
         my_var:req.session.my_var,
         session:req.session
+    })
+})
+
+app.get('/try-moment',(req,res)=>{
+    const fm = 'YYYY-MM-DD HH:mm:ss'
+    const m1 = moment ()
+    const m2 = moment ('2022-02-29')
+
+    res.json({
+        m1:m1.format(fm),
+        m1a:m1.tz('Europe/London').format(fm),
+        m2:m2.format(fm),
+        m2a:m2.tz('Europe/London').format(fm)
     })
 })
 
@@ -56,6 +77,13 @@ app.get('/my-params1/:action?/:id?',(req,res)=>{
 
 app.get('/my-params2/*/*?',(req,res)=>{
     res.json(req.params)
+})
+
+app.get('/try.json',(req,res)=>{
+    const data = require(__dirname + '/data/data01.json')
+    console.log(data)
+    res.locals.rows = data;
+    res.render('try-json')
 })
 
 const adminRouter = require(__dirname + '/routes/admin')
