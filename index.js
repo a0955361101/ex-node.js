@@ -10,6 +10,12 @@ const sessionStore = new MysqlStore({}, db);
 const app = express()
 
 
+const {
+    toDateString,
+    toDatetimeString,
+} = require(__dirname + '/module/date-tools');
+
+
 app.post('/try-upload',upload.single('avatar'),(req,res)=>{
     res.json(req.file)
 })
@@ -17,6 +23,10 @@ app.post('/try-upload',upload.single('avatar'),(req,res)=>{
 app.post('/try-uploads',upload.array('photos'),(req,res)=>{
     res.json(req.files)
 })
+
+
+app.use('/try-course',require(__dirname + '/routes/course'))
+
 
 app.use(session({
     saveUninitialized:false,
@@ -31,7 +41,9 @@ app.use(session({
 app.use(express.urlencoded({extended:false}))
 app.use(express.json())
 app.use((req, res, next)=>{
-    res.locals.shinder = '哈囉';
+    // res.locals.shinder = '哈囉';
+    res.locals.toDateString = toDateString;
+    res.locals.toDatetimeString = toDatetimeString;
     next();
 });
 
