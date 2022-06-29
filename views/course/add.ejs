@@ -57,4 +57,34 @@
     </div>
 </div>
 
-<%- include('../parts/script') %> <%- include('../parts/footer') %>
+<%- include('../parts/script') %>
+<script>
+    function sendForm(event) {
+        event.preventDefault();
+
+        const fd = new FormData(document.form1);
+
+        const dataObj = {};
+        for (let i of fd.entries()) {
+            console.log(i);
+
+            dataObj[i[0]] = i[1];
+        }
+        console.log(dataObj); // 轉換成物件
+
+        const usp = new URLSearchParams(fd);
+
+        // 轉換 urlencoded
+        console.log(usp.toString());
+
+        fetch("", {
+            method: "POST",
+            body: fd,
+        })
+            .then((r) => r.json())
+            .then((obj) => {
+                console.log(obj);
+            });
+    }
+</script>
+<%- include('../parts/footer') %>
