@@ -8,6 +8,7 @@ const db = require(__dirname + '/module/mysql-connect');
 const MysqlStore = require('express-mysql-session')(session);
 const sessionStore = new MysqlStore({}, db);
 const app = express()
+const bcrypt = require('bcryptjs');
 
 
 const {
@@ -16,16 +17,10 @@ const {
 } = require(__dirname + '/module/date-tools');
 
 
-app.post('/try-upload',upload.single('avatar'),(req,res)=>{
-    res.json(req.file)
-})
-
-app.post('/try-uploads',upload.array('photos'),(req,res)=>{
-    res.json(req.files)
-})
 
 
-app.use('/try-course',require(__dirname + '/routes/course'))
+
+
 
 
 app.use(session({
@@ -37,15 +32,29 @@ app.use(session({
         maxAge:1800000, // 30 min
     }
    
-}))
-app.use(express.urlencoded({extended:false}))
-app.use(express.json())
+}));
+
 app.use((req, res, next)=>{
     // res.locals.shinder = '哈囉';
     res.locals.toDateString = toDateString;
     res.locals.toDatetimeString = toDatetimeString;
+    res.locals.session = req.session;
     next();
-});
+})
+
+
+app.post('/try-upload',upload.single('avatar'),(req,res)=>{
+    res.json(req.file)
+})
+
+app.post('/try-uploads',upload.array('photos'),(req,res)=>{
+    res.json(req.files)
+})
+
+app.use('/try-course',require(__dirname + '/routes/course'))
+app.use(express.urlencoded({extended:false}))
+app.use(express.json())
+
 
 app.get('/try-session',(req,res)=>{
     req.session.my_var = req.session.my_var || 0
@@ -130,9 +139,53 @@ app.route('/try-post-form')
 
 app.set("view engine", "ejs");
 
+app.route('/login')
+    .get(async (req, res)=>{
+        res.render('login');
+    })
+    .post(async (req, res)=>{
+        const output = {
+            success: false,
+            error: '',
+            code: 0,
+        };
+        const sql = "SELECT * FROM admin WHERE account=?";
+        const [r1] = await db.query(sql, [req.body.account]);
+
+        if(! r1.length){
+            // 帳號錯誤
+            output.code = 401;
+            output.error = '帳密錯誤'
+            return res.json(output)
+        }
+        //const row = r1[0];
+
+        output.success = await bcrypt.compare(req.body.password, r1[0].password);
+       
+        if(! output.success){
+            // 密碼錯誤
+            output.code = 402;
+            output.error = '密碼錯誤'
+        }else {
+            req.session.admin = {
+                sid: r1[0].sid,
+                account: r1[0].account,
+            };
+        }
+
+        res.json(output);
+    });
+
+    app.get('/logout',(req,res)=>{
+        delete req.session.admin
+        res.redirect("/")
+    })
+
+
 app.use(express.static('public'))
 
 app.use('/bootstrap',express.static('node_modules/bootstrap/dist'))
+app.use("/joi", express.static("node_modules/joi/dist"));
 app.use((req,res)=>{
     
     res.send(`<h2>404 - 找不到網頁</h2>

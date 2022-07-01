@@ -81,6 +81,36 @@ router.get('/add', async (req, res)=>{
     res.render('course/add');
 });
 
+router.post('/add',  async (req, res)=>{
+//     // const schema = Joi.object({
+//     //     name: Joi.string()
+//     //         .min(3)
+//     //         .required()
+//     //         .label('姓名必填'),
+//     //     email: Joi.string()
+//     //         .email()
+//     //         .required(),
+//     //     mobile: Joi.string(),
+//     //     birthday: Joi.string(),
+//     //     address: Joi.string(),
+//     // });
+
+//     // res.json( schema.validate(req.body, {abortEarly: false}) );
+
+    const sql = "INSERT INTO `course`( `course_name`, `course_price`,  `course_content`, `course_people`, `course_material`) VALUES (?,?,?,?,?)"
+const {course_name, course_price,  course_content, course_people, course_material} = req.body
+
+const [result] = await db.query(sql,[course_name, course_price,  course_content, course_people, course_material])
+console.log(result);
+res.json(result)
+
+
+});
+
+
+
+
+
 router.get('/',async(req,res)=>{
     const output = await getListHandler(req,res)
     switch(output.code){
